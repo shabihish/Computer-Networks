@@ -1,5 +1,3 @@
-package require Tcl 8.5.0-8.7
-
 set opt(chan)           Channel/WirelessChannel  ;# channel type
 set opt(prop)           Propagation/TwoRayGround ;# radio-propagation model
 set opt(netif)          Phy/WirelessPhy          ;# network interface type
@@ -28,7 +26,7 @@ set tracefd  [open wireless.tr w]
 set namfile [open wireless.nam w]
 
 $ns trace-all $tracefd
-#$ns namfile-all-wireless $namfile $opt(x) $opt(y)
+$ns namtrace-all-wireless $namfile $opt(x) $opt(y)
 
 # create  and define the topography object and layout
 set topo [new Topography]
