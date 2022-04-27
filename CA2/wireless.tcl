@@ -10,12 +10,13 @@ set opt(nn)             9
 
 set opt(adhocRouting)   AODV                     ;# routing protocol
 
-set opt(x)              600    ;# x coordinate of topology
-set opt(y)              600                      ;# y coordinate of topology
+set opt(x)              1050    ;# x coordinate of topology
+set opt(y)              1050                      ;# y coordinate of topology
 
 set opt(finish)              100                      ;# finish time
 
 set ns [new Simulator]
+
 
 
 
@@ -56,7 +57,13 @@ $ns node-config -adhocRouting $opt(adhocRouting) \
                  #-wiredRouting OFF \
                  -agentTrace ON \
                  -routerTrace ON \
-                 -macTrace ON
+                 -macTrace ON 
+                 # -txpower 0.02 \
+                 # -rxpower 0.02
+
+
+
+
 
 # create the bottom-row nodes as a node array $rownode(), and the moving node as $mover
 
@@ -71,129 +78,153 @@ set G [$ns node]
 set H [$ns node]
 set L [$ns node]
 
-$A set X_ 200
-$A set Y_ 500
+$A set X_ 350
+$A set Y_ 875
 $A set Z_ 0
 
-$B set X_ 100
-$B set Y_ 300
+$B set X_ 175
+$B set Y_ 525
 $B set Z_ 0
 
-$C set X_ 300
-$C set Y_ 400
+$C set X_ 525
+$C set Y_ 700
 $C set Z_ 0
 
-$D set X_ 200
-$D set Y_ 100
+$D set X_ 350
+$D set Y_ 175
 $D set Z_ 0
 
-$E set X_ 300
-$E set Y_ 200
+$E set X_ 525
+$E set Y_ 350
 $E set Z_ 0
 
-$F set X_ 400
-$F set Y_ 200
+$F set X_ 700
+$F set Y_ 350
 $F set Z_ 0
 
-$G set X_ 400
-$G set Y_ 400
+$G set X_ 700
+$G set Y_ 700
 $G set Z_ 0
 
-$H set X_ 500
-$H set Y_ 400
+$H set X_ 875
+$H set Y_ 700
 $H set Z_ 0
 
-$L set X_ 500
-$L set Y_ 200
+$L set X_ 875
+$L set Y_ 350
 $L set Z_ 0
+
+
+set tcp [new Agent/TCP]
+set sink [new Agent/TCPSink]
+$ns attach-agent $A $tcp
+$ns attach-agent $H $sink
+$ns connect $tcp $sink
+
+set cbr1 [new Application/Traffic/CBR]
+$cbr1 set interval_ 500us
+$cbr1 set packetSize_ 10
+$cbr1 set rate_ 200Kb
+$cbr1 set random_ 1
+
+
+$cbr1 attach-agent $tcp
+
+$ns at 1.0 "$cbr1 start"
+
+
+set tcp2 [new Agent/TCP]
+set sink2 [new Agent/TCPSink]
+$ns attach-agent $D $tcp2
+$ns attach-agent $L $sink2
+$ns connect $tcp2 $sink2
+
+set cbr2 [new Application/Traffic/CBR]
+$cbr2 set interval_ 500us
+$cbr2 set packetSize_ 10
+$cbr2 set rate_ 200Kb
+$cbr2 set random_ 1
+
+
+$cbr2 attach-agent $tcp2
+$ns at 1.0 "$cbr2 start"
 
 
 
 # setup UDP connection, using CBR traffic
 
-set tcp0 [new Agent/TCP]
-set sink0 [new Agent/TCPSink]
+# set tcp0 [new Agent/TCP]
+# # set tcp01 [new Agent/TCP]
+# set sink0 [new Agent/TCPSink]
+# # set sink01 [new Agent/TCPSink]
 
-set tcp1 [new Agent/TCP]
-set sink1 [new Agent/TCPSink]
+# set tcp1 [new Agent/TCP]
+# # set tcp11 [new Agent/TCP]
 
-set tcp2 [new Agent/TCP]
-set sink2 [new Agent/TCPSink]
+# set sink1 [new Agent/TCPSink]
+# # set sink11 [new Agent/TCPSink]
 
-set tcp3 [new Agent/TCP]
-set sink3 [new Agent/TCPSink]
+# $ns attach-agent $A $tcp0
+# # $ns attach-agent $A $tcp01
+# $ns attach-agent $D $tcp1
+# # $ns attach-agent $D $tcp11
 
-set tcp4 [new Agent/TCP]
-set sink4 [new Agent/TCPSink]
-
-set tcp5 [new Agent/TCP]
-set sink5 [new Agent/TCPSink]
-
-set tcp6 [new Agent/TCP]
-set sink6 [new Agent/TCPSink]
-
-
-$ns attach-agent $A $tcp0
-$ns attach-agent $D $tcp1
-
-$ns attach-agent $B $tcp2
-$ns attach-agent $C $tcp3
-$ns attach-agent $E $tcp4
-$ns attach-agent $F $tcp5
-$ns attach-agent $G $tcp6
-
-$ns attach-agent $B $sink0
-$ns attach-agent $C $sink1
-$ns attach-agent $E $sink2
-$ns attach-agent $G $sink3
-$ns attach-agent $F $sink4
-
-$ns attach-agent $H $sink5
-$ns attach-agent $L $sink6
-
-# A-C-E-G-L  => A-L
-$ns connect $tcp0 $sink1
-$ns connect $tcp3 $sink2
-$ns connect $tcp4 $sink3
-$ns connect $tcp6 $sink5
-
-# A-C-G-H => A-H
-$ns connect $tcp0 $sink1
-$ns connect $tcp3 $sink3
-$ns connect $tcp6 $sink5
-
-#D-E-F-G-H => D-H
-$ns connect $tcp1 $sink2
-$ns connect $tcp4 $sink4
-$ns connect $tcp5 $sink3
-$ns connect $tcp6 $sink5
-
-#D-E-F-L => D-L
-$ns connect $tcp1 $sink2
-$ns connect $tcp4 $sink4
-$ns connect $tcp5 $sink6
+# $ns attach-agent $H $sink0
+# # $ns attach-agent $H $sink1
+# $ns attach-agent $L $sink1
+# # $ns attach-agent $L $sink11
 
 
-set cbr1 [new Application/Traffic/CBR]
-$cbr1 set packetSize_ 512
-$cbr1 set rate_ 200Kb
+#$ns connect $tcp0 $sink0
 
-$cbr1 attach-agent $tcp0
-$cbr1 attach-agent $tcp1
-$cbr1 attach-agent $tcp2
-$cbr1 attach-agent $tcp3
-$cbr1 attach-agent $tcp4
-$cbr1 attach-agent $tcp5
-$cbr1 attach-agent $tcp6
+# $ns connect $tcp0 $sink1
 
-$ns at 0 "$cbr1 start"
-$ns at $opt(finish) "$cbr1 stop"
+# #$ns connect $tcp1 $sink1
+
+# $ns connect $tcp1 $sink1
+
+
+# set cbr1 [new Application/Traffic/CBR]
+# $cbr1 set interval_ 500us
+# # $cbr1 set packetSize_ 10
+# # $cbr1 set rate_ 200Kb
+# $cbr1 set random_ 1
+
+# $cbr1 attach-agent $tcp0
+# #$cbr1 attach-agent $tcp11
+
+# set cbr2 [new Application/Traffic/CBR]
+# $cbr2 set interval_ 800us
+# # $cbr2 set packetSize_ 10
+# # $cbr2 set rate_ 200Kb
+# $cbr2 set random_ 1
+
+# $cbr2 attach-agent $tcp1
+#$cbr2 attach-agent $tcp0
+
+
+#$ns at 0 "$cbr1 start"
+# $ns at 0 "$cbr1 stop"
+
+#$ns at 0 "$cbr2 start"
+# $ns at $opt(finish) "$cbr2 stop"
 
 # tell nam the initial node position (taken from node attributes)
 # and size (supplied as a parameter)
 
 
 $ns at $opt(finish) "finish"
+
+$ns initial_node_pos $A 20
+$ns initial_node_pos $B 20
+$ns initial_node_pos $C 20
+$ns initial_node_pos $D 20
+$ns initial_node_pos $E 20
+$ns initial_node_pos $F 20
+$ns initial_node_pos $G 20
+$ns initial_node_pos $H 20
+$ns initial_node_pos $L 20
+
 
 proc finish {} {
     global ns tracefd namfile
