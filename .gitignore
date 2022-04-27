@@ -1,5 +1,8 @@
 # Project-specific files
 .idea
+LICENSE
+README.md
+*.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

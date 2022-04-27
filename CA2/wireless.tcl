@@ -1,15 +1,4 @@
-# wireless.tcl: wireless simulation for the following arrangement:
-#
-#    m -->  (moving node)
-#
-#
-#    n0         n1          n2          n3   ...   (fixed nodes)
-#
-# default wireless range is 250 m, based on constants in ns-default.tcl
-#
-# ======================================================================
-# Define options
-# ======================================================================
+
 set opt(chan)           Channel/WirelessChannel  ;# channel type
 set opt(prop)           Propagation/TwoRayGround ;# radio-propagation model
 set opt(netif)          Phy/WirelessPhy          ;# network interface type
@@ -18,33 +7,25 @@ set opt(ifq)            Queue/DropTail/PriQueue  ;# interface queue type
 set opt(ll)             LL                       ;# link layer type
 set opt(ant)            Antenna/OmniAntenna      ;# antenna model
 set opt(ifqlen)         50                       ;# max packet in ifq
+set opt(nn)             9
 
-set opt(bottomrow)      5                        ;# number of bottom-row nodes
-set opt(spacing)        200                      ;# spacing between bottom-row nodes
-set opt(mheight)        150                      ;# height of moving node above bottom-row nodes
-set opt(brheight)	50			 ;# height of bottom-row nodes from bottom edge
 set opt(adhocRouting)   AODV                     ;# routing protocol
 
-set opt(x)              [expr ($opt(bottomrow)-1)*$opt(spacing)+1]    ;# x coordinate of topology
-set opt(y)              300                      ;# y coordinate of topology
-set opt(finish)         100                      ;# time to stop simulation
+set opt(x)              600    ;# x coordinate of topology
+set opt(y)              600                      ;# y coordinate of topology
 
-# the next value is the speed in meters/sec to move across the field
-set opt(speed)		[expr 1.0*$opt(x)/$opt(finish)]
-
-# ============================================================================
-
-# create the simulator object
 set ns [new Simulator]
 
-set name [lindex [split [info script] "."] 0]
+
 
 # set up tracing
 $ns use-newtrace
-set tracefd  [open $name.tr w]
-set namtrace [open $name.nam w]
+set tracefd  [open $wireless.tr w]
+
+set namfile [open $wireless.nam w]
+
 $ns trace-all $tracefd
-$ns namtrace-all-wireless $namtrace $opt(x) $opt(y)
+#$ns namfile-all-wireless $namfile $opt(x) $opt(y)
 
 # create  and define the topography object and layout
 set topo [new Topography]
@@ -54,11 +35,12 @@ $topo load_flatgrid $opt(x) $opt(y)
 # create an instance of General Operations Director, which keeps track of nodes and
 # node-to-node reachability. The parameter is the total number of nodes in the simulation.
 
-create-god [expr $opt(bottomrow) + 1]
+create-god $opt(nn)
 
 # general node configuration
 
 set chan1 [new $opt(chan)]
+
 
 $ns node-config -adhocRouting $opt(adhocRouting) \
                  -llType $opt(ll) \
@@ -70,65 +52,153 @@ $ns node-config -adhocRouting $opt(adhocRouting) \
                  -phyType $opt(netif) \
                  -channel $chan1 \
                  -topoInstance $topo \
-                 -wiredRouting OFF \
+                 #-wiredRouting OFF \
                  -agentTrace ON \
                  -routerTrace ON \
-                 -macTrace OFF
+                 -macTrace ON
 
 # create the bottom-row nodes as a node array $rownode(), and the moving node as $mover
 
-for {set i 0} {$i < $opt(bottomrow)} {incr i} {
-    set rownode($i) [$ns node]
-    $rownode($i) set X_ [expr $i * $opt(spacing)]
-    $rownode($i) set Y_ $opt(brheight)
-    $rownode($i) set Z_ 0
-}
+set A [$ns node]
+set B [$ns node]
+set c [$ns node]
+set D [$ns node]
+set E [$ns node]
+set F [$ns node]
 
+set G [$ns node]
+set H [$ns node]
+set L [$ns node]
 
-set mover [$ns node]
-$mover set X_ 0
-$mover set Y_ [expr $opt(mheight) + $opt(brheight)]
-$mover set Z_ 0
+$A set X_ 200
+$A set Y_ 500
+$A set Z_ 0
 
-set moverdestX [expr $opt(x) - 1]
+$B set X_ 100
+$B set Y_ 300
+$B set Z_ 0
 
-$ns at 0 "$mover setdest $moverdestX [$mover set Y_] $opt(speed)"
+$C set X_ 300
+$C set Y_ 400
+$c set Z_ 0
+
+$D set X_ 200
+$D set Y_ 100
+$D set Z_ 0
+
+$E set X_ 300
+$E set Y_ 200
+$E set Z_ 0
+
+$F set X_ 400
+$F set Y_ 200
+$F set Z_ 0
+
+$G set X_ 400
+$G set Y_ 400
+$G set Z_ 0
+
+$H set X_ 500
+$H set Y_ 400
+$H set Z_ 0
+
+$L set X_ 500
+$L set Y_ 200
+$L set Z_ 0
+
 
 
 # setup UDP connection, using CBR traffic
 
-set udp [new Agent/UDP]
-set null [new Agent/Null]
-$ns attach-agent $rownode(0) $udp
-$ns attach-agent $mover $null
-$ns connect $udp $null
+set tcp0 [new Agent/TCP]
+set sink0 [new Agent/TCPSink]
+
+set tcp1 [new Agent/TCP]
+set sink1 [new Agent/TCPSink]
+
+set tcp2 [new Agent/TCP]
+set sink2 [new Agent/TCPSink]
+
+set tcp3 [new Agent/TCP]
+set sink3 [new Agent/TCPSink]
+
+set tcp4 [new Agent/TCP]
+set sink4 [new Agent/TCPSink]
+
+set tcp5 [new Agent/TCP]
+set sink5 [new Agent/TCPSink]
+
+set tcp6 [new Agent/TCP]
+set sink6 [new Agent/TCPSink]
+
+
+$ns attach-agent $A $tcp0
+$ns attach-agent $D $tcp1
+
+$ns attach-agent $B $tcp2
+$ns attach-agent $C $tcp3
+$ns attach-agent $E $tcp4
+$ns attach-agent $F $tcp5
+$ns attach-agent $G $tcp6
+
+$ns attach-agent $B $sink0
+$ns attach-agent $C $sink1
+$ns attach-agent $E $sink2
+$ns attach-agent $G $sink3
+$ns attach-agent $F $sink4
+
+$ns attach-agent $H $sink5
+$ns attach-agent $L $sink6
+
+# A-C-E-G-L  => A-L
+$ns connect $tcp0 $sink1
+$ns connect $tcp3 $sink2
+$ns connect $tcp4 $sink3
+$ns connect $tcp6 $sink5
+
+# A-C-G-H => A-H
+$ns connect $tcp0 $sink1
+$ns connect $tcp3 $sink3
+$ns connect $tcp6 $sink5
+
+#D-E-F-G-H => D-H
+$ns connect $tcp1 $sink2
+$ns connect $tcp4 $sink4
+$ns connect $tcp5 $sink3
+$ns connect $tcp6 $sink5
+
+#D-E-F-L => D-L
+$ns connect $tcp1 $sink2
+$ns connect $tcp4 $sink4
+$ns connect $tcp5 $sink6
+
+
 set cbr1 [new Application/Traffic/CBR]
 $cbr1 set packetSize_ 512
 $cbr1 set rate_ 200Kb
-$cbr1 attach-agent $udp
+
+$cbr1 attach-agent $tcp0
+$cbr1 attach-agent $tcp1
+$cbr1 attach-agent $tcp2
+$cbr1 attach-agent $tcp3
+$cbr1 attach-agent $tcp4
+$cbr1 attach-agent $tcp5
+$cbr1 attach-agent $tcp6
+
 $ns at 0 "$cbr1 start"
 $ns at $opt(finish) "$cbr1 stop"
 
 # tell nam the initial node position (taken from node attributes)
 # and size (supplied as a parameter)
 
-for {set i 0} {$i < $opt(bottomrow)} {incr i} {
-    $ns initial_node_pos $rownode($i) 10
-}
-
-$ns initial_node_pos $mover 20
-
-# set the color of the mover node in nam
-$mover color blue
-$ns at 0.0 "$mover color blue"
 
 $ns at $opt(finish) "finish"
 
 proc finish {} {
-    global ns tracefd namtrace
+    global ns tracefd namfile
     $ns flush-trace
     close $tracefd
-    close $namtrace
+    close $namfile
     exit 0
 }
 
