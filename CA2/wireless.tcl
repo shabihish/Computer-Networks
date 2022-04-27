@@ -1,3 +1,4 @@
+package require Tcl 8.5.0-8.7
 
 set opt(chan)           Channel/WirelessChannel  ;# channel type
 set opt(prop)           Propagation/TwoRayGround ;# radio-propagation model
@@ -14,15 +15,17 @@ set opt(adhocRouting)   AODV                     ;# routing protocol
 set opt(x)              600    ;# x coordinate of topology
 set opt(y)              600                      ;# y coordinate of topology
 
+set opt(finish)              100                      ;# finish time
+
 set ns [new Simulator]
 
 
 
 # set up tracing
 $ns use-newtrace
-set tracefd  [open $wireless.tr w]
+set tracefd  [open wireless.tr w]
 
-set namfile [open $wireless.nam w]
+set namfile [open wireless.nam w]
 
 $ns trace-all $tracefd
 #$ns namfile-all-wireless $namfile $opt(x) $opt(y)
@@ -61,7 +64,7 @@ $ns node-config -adhocRouting $opt(adhocRouting) \
 
 set A [$ns node]
 set B [$ns node]
-set c [$ns node]
+set C [$ns node]
 set D [$ns node]
 set E [$ns node]
 set F [$ns node]
@@ -80,7 +83,7 @@ $B set Z_ 0
 
 $C set X_ 300
 $C set Y_ 400
-$c set Z_ 0
+$C set Z_ 0
 
 $D set X_ 200
 $D set Y_ 100

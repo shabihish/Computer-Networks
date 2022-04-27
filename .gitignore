@@ -3,6 +3,8 @@
 LICENSE
 README.md
 *.pdf
+*.nam
+*.tr
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
