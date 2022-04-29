@@ -7,42 +7,38 @@ set opt(ll)             LL                       ;# link layer type
 set opt(ant)            Antenna/OmniAntenna      ;# antenna model
 set opt(ifqlen)         50                       ;# max packet in ifq
 set opt(nn)             9
-
 set opt(adhocRouting)   AODV                     ;# routing protocol
-
 set opt(x)              1050    ;# x coordinate of topology
 set opt(y)              1050                      ;# y coordinate of topology
-
-set opt(finish)              100                      ;# finish time
-
+set opt(finish)              100.0                     ;# finish time
 set ns [new Simulator]
+set packet_size 64
 
+set name wireless
 
+# Setup the output .tr files
+set th0 [open throughput0.tr w]
+set th1 [open throughput1.tr w]
 
+set delay [open delay.tr w]
+set transfer_ratio [open packet_transfer_ratio.tr w]
 
-# set up tracing
 $ns use-newtrace
-set tracefd  [open wireless.tr w]
-
-set namfile [open wireless.nam w]
+set tracefd  [open $name.tr w]
+set namfile [open $name.nam w]
 
 $ns trace-all $tracefd
 $ns namtrace-all-wireless $namfile $opt(x) $opt(y)
 
-# create  and define the topography object and layout
+# Mac/802_11 set dataRate_                $val(datarate)
+Mac/802_11 set RTSThreshold_    100000
+
 set topo [new Topography]
-
 $topo load_flatgrid $opt(x) $opt(y)
-
-# create an instance of General Operations Director, which keeps track of nodes and
-# node-to-node reachability. The parameter is the total number of nodes in the simulation.
 
 create-god $opt(nn)
 
-# general node configuration
-
 set chan1 [new $opt(chan)]
-
 
 $ns node-config -adhocRouting $opt(adhocRouting) \
                  -llType $opt(ll) \
@@ -57,29 +53,25 @@ $ns node-config -adhocRouting $opt(adhocRouting) \
                  #-wiredRouting OFF \
                  -agentTrace ON \
                  -routerTrace ON \
-                 -macTrace ON 
-                 # -txpower 0.02 \
-                 # -rxpower 0.02
+                 -macTrace ON \
+                 #-txpower 0.002 \
+                 #-rxpower 0.002
 
 
-
-
-
-# create the bottom-row nodes as a node array $rownode(), and the moving node as $mover
-
+# Create the nodes
 set A [$ns node]
 set B [$ns node]
 set C [$ns node]
 set D [$ns node]
 set E [$ns node]
 set F [$ns node]
-
 set G [$ns node]
 set H [$ns node]
 set L [$ns node]
 
-$A set X_ 350
-$A set Y_ 875
+# Set nodes' positions
+$A set X_ 375
+$A set Y_ 700
 $A set Z_ 0
 
 $B set X_ 175
@@ -87,10 +79,10 @@ $B set Y_ 525
 $B set Z_ 0
 
 $C set X_ 525
-$C set Y_ 700
+$C set Y_ 525
 $C set Z_ 0
 
-$D set X_ 350
+$D set X_ 375
 $D set Y_ 175
 $D set Z_ 0
 
@@ -103,137 +95,176 @@ $F set Y_ 350
 $F set Z_ 0
 
 $G set X_ 700
-$G set Y_ 700
+$G set Y_ 525
 $G set Z_ 0
 
 $H set X_ 875
-$H set Y_ 700
+$H set Y_ 525
 $H set Z_ 0
 
 $L set X_ 875
 $L set Y_ 350
 $L set Z_ 0
 
+set tcp00 [new Agent/TCP]
+set tcp01 [new Agent/TCP]
+set tcp10 [new Agent/TCP]
+set tcp11 [new Agent/TCP]
 
-set tcp [new Agent/TCP]
-set sink [new Agent/TCPSink]
-$ns attach-agent $A $tcp
-$ns attach-agent $H $sink
-$ns connect $tcp $sink
+set sink00 [new Agent/TCPSink]
+set sink01 [new Agent/TCPSink]
+set sink10 [new Agent/TCPSink]
+set sink11 [new Agent/TCPSink]
 
-set cbr1 [new Application/Traffic/CBR]
-$cbr1 set interval_ 500us
-$cbr1 set packetSize_ 10
-$cbr1 set rate_ 200Kb
-$cbr1 set random_ 1
+$ns attach-agent $A $tcp00
+$ns attach-agent $A $tcp01
 
+$ns attach-agent $D $tcp10
+$ns attach-agent $D $tcp11
 
-$cbr1 attach-agent $tcp
+$ns attach-agent $H $sink00
+$ns attach-agent $H $sink01
 
-$ns at 1.0 "$cbr1 start"
+$ns attach-agent $L $sink10
+$ns attach-agent $L $sink11
 
+$ns connect $tcp00 $sink00
+$ns connect $tcp01 $sink10
 
-set tcp2 [new Agent/TCP]
-set sink2 [new Agent/TCPSink]
-$ns attach-agent $D $tcp2
-$ns attach-agent $L $sink2
-$ns connect $tcp2 $sink2
+$ns connect $tcp10 $sink01
+$ns connect $tcp11 $sink11
 
-set cbr2 [new Application/Traffic/CBR]
-$cbr2 set interval_ 500us
-$cbr2 set packetSize_ 10
-$cbr2 set rate_ 200Kb
-$cbr2 set random_ 1
+set ftp00 [new Application/Traffic/CBR]
+set ftp01 [new Application/Traffic/CBR]
+set ftp10 [new Application/Traffic/CBR]
+set ftp11 [new Application/Traffic/CBR]
 
+$ftp00 set rate_ 100kb
+$ftp01 set rate_ 100kb
+$ftp10 set rate_ 100kb
+$ftp11 set rate_ 100kb
 
-$cbr2 attach-agent $tcp2
-$ns at 1.0 "$cbr2 start"
+$ftp00 set packetSize_ 64Kb
+$ftp01 set packetSize_ 64Kb
+$ftp10 set packetSize_ 64Kb
+$ftp11 set packetSize_ 64Kb
 
+$ftp00 set random_ 1
+$ftp01 set random_ 1
+$ftp10 set random_ 1
+$ftp11 set random_ 1
 
+#$cbr1 set interval_ 500us
+#$cbr1 set packetSize_ 64
+#$cbr1 set rate_ 200Kb
+#$cbr1 set random_ 1
 
-# setup UDP connection, using CBR traffic
+$ftp00 attach-agent $tcp00
+$ftp01 attach-agent $tcp01
+$ftp10 attach-agent $tcp10
+$ftp11 attach-agent $tcp11
 
-# set tcp0 [new Agent/TCP]
-# # set tcp01 [new Agent/TCP]
-# set sink0 [new Agent/TCPSink]
-# # set sink01 [new Agent/TCPSink]
+$ns at 0.0 "initialize"
 
-# set tcp1 [new Agent/TCP]
-# # set tcp11 [new Agent/TCP]
-
-# set sink1 [new Agent/TCPSink]
-# # set sink11 [new Agent/TCPSink]
-
-# $ns attach-agent $A $tcp0
-# # $ns attach-agent $A $tcp01
-# $ns attach-agent $D $tcp1
-# # $ns attach-agent $D $tcp11
-
-# $ns attach-agent $H $sink0
-# # $ns attach-agent $H $sink1
-# $ns attach-agent $L $sink1
-# # $ns attach-agent $L $sink11
-
-
-#$ns connect $tcp0 $sink0
-
-# $ns connect $tcp0 $sink1
-
-# #$ns connect $tcp1 $sink1
-
-# $ns connect $tcp1 $sink1
+$ns at 0.0 "$ftp00 start"
+$ns at 0.0 "$ftp11 start"
+$ns at 0.0 "$ftp10 start"
+$ns at 0.0 "$ftp01 start"
 
 
-# set cbr1 [new Application/Traffic/CBR]
-# $cbr1 set interval_ 500us
-# # $cbr1 set packetSize_ 10
-# # $cbr1 set rate_ 200Kb
-# $cbr1 set random_ 1
+$ns initial_node_pos $A 50
+$ns initial_node_pos $B 50
+$ns initial_node_pos $C 50
+$ns initial_node_pos $D 50
+$ns initial_node_pos $E 50
+$ns initial_node_pos $F 50
+$ns initial_node_pos $G 50
+$ns initial_node_pos $H 50
+$ns initial_node_pos $L 50
 
-# $cbr1 attach-agent $tcp0
-# #$cbr1 attach-agent $tcp11
+set time 1
 
-# set cbr2 [new Application/Traffic/CBR]
-# $cbr2 set interval_ 800us
-# # $cbr2 set packetSize_ 10
-# # $cbr2 set rate_ 200Kb
-# $cbr2 set random_ 1
+proc initialize {} {
+	global sink00 sink01 sink10 sink11 ns time tcp00 tcp01 tcp10 tcp11
 
-# $cbr2 attach-agent $tcp1
-#$cbr2 attach-agent $tcp0
+	$sink00 set bytes_ 0
+	$sink01 set bytes_ 0
+	$sink10 set bytes_ 0
+	$sink11 set bytes_ 0
+
+    $tcp00 set bytes_ 0
+	$tcp01 set bytes_ 0
+	$tcp10 set bytes_ 0
+	$tcp11 set bytes_ 0
+
+	set now [$ns now]
+    $ns at [expr $now+$time] "record"
+
+}
+
+proc record {} {
+	    global sink00 sink01 sink10 sink11 tcp00 tcp01 tcp10 tcp11
+		global th0 th1 f2 time ns delay transfer_ratio packet_size
+		#Set the time after which the procedure should be called again
+
+		#How many bytes have been received by the traffic sinks?
+		set bw00 [$sink00 set bytes_]
+		set bw01 [$sink01 set bytes_]
+		set bw10 [$sink10 set bytes_]
+		set bw11 [$sink11 set bytes_]
+
+		set tcp_bw00 [$tcp00 set bytes_]
+		set tcp_bw01 [$tcp01 set bytes_]
+		set tcp_bw10 [$tcp10 set bytes_]
+		set tcp_bw11 [$tcp11 set bytes_]
+
+		#Get the current time
+		set now [$ns now]
+
+		#Calculate the bandwidth (in MBytes/s) and write it to the files
+		set throughput0 [expr ($bw00*8)/($time*1000000) + ($bw01*8)/($time*1000000)]
+		set throughput1 [expr ($bw10*8)/($time*1000000) + ($bw11*8)/($time*1000000)]
+
+		set end_to_end_delay [expr ($time * 2) / (($bw00 + $bw01 + $bw10 + $bw11)*8 / $packet_size)]
+    	set transfer_ratio_val [expr ($bw00 + $bw01 + $bw10 + $bw11)]
+
+		puts $th0 "$now [expr $throughput0]"
+		puts $th1 "$now [expr $throughput1]"
+		puts $delay "$now $end_to_end_delay"
+		puts $transfer_ratio "$now $transfer_ratio_val"
 
 
-#$ns at 0 "$cbr1 start"
-# $ns at 0 "$cbr1 stop"
+		#Reset the bytes_ values on the traffic sinks
+		$sink00 set bytes_ 0
+		$sink01 set bytes_ 0
+		$sink10 set bytes_ 0
+		$sink11 set bytes_ 0
 
-#$ns at 0 "$cbr2 start"
-# $ns at $opt(finish) "$cbr2 stop"
+		$tcp00 set bytes_ 0
+        $tcp01 set bytes_ 0
+        $tcp10 set bytes_ 0
+        $tcp11 set bytes_ 0
 
-# tell nam the initial node position (taken from node attributes)
-# and size (supplied as a parameter)
-
-
-$ns at $opt(finish) "finish"
-
-$ns initial_node_pos $A 20
-$ns initial_node_pos $B 20
-$ns initial_node_pos $C 20
-$ns initial_node_pos $D 20
-$ns initial_node_pos $E 20
-$ns initial_node_pos $F 20
-$ns initial_node_pos $G 20
-$ns initial_node_pos $H 20
-$ns initial_node_pos $L 20
-
+		#Re-schedule the procedure
+		$ns at [expr $now+$time] "record"
+	}
 
 proc finish {} {
-    global ns tracefd namfile
+    global ns tracefd namfile th0 th1 name delay transfer_ratio
     $ns flush-trace
-    close $tracefd
+
     close $namfile
+    close $tracefd
+
+    close $th0
+    close $th1
+    close $delay
+    close $transfer_ratio
+
+    exec nam $name.nam
     exit 0
 }
 
-# begin simulation
+$ns at $opt(finish) "finish"
 
 $ns run
