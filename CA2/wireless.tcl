@@ -20,9 +20,6 @@ set name wireless
 set th0 [open throughput0.tr w]
 set th1 [open throughput1.tr w]
 
-set delay [open delay.tr w]
-set transfer_ratio [open packet_transfer_ratio.tr w]
-
 $ns use-newtrace
 set tracefd  [open $name.tr w]
 set namfile [open $name.nam w]
@@ -45,7 +42,7 @@ set chan1 [new $opt(chan)]
 proc UniformErr {} {
     set err [new ErrorModel]
     $err unit packet ;#it can be bit too
-    $err set rate_ 0.00001
+    $err set rate_ 0.0001
     return $err
 }
 
@@ -201,20 +198,15 @@ $ns initial_node_pos $G 50
 $ns initial_node_pos $H 50
 $ns initial_node_pos $L 50
 
-set time 1
+set time 1.0
 
 proc initialize {} {
-	global sink00 sink01 sink10 sink11 ns time tcp00 tcp01 tcp10 tcp11
+	global sink00 sink01 sink10 sink11 ns time
 
 	$sink00 set bytes_ 0
 	$sink01 set bytes_ 0
 	$sink10 set bytes_ 0
 	$sink11 set bytes_ 0
-
-    $tcp00 set bytes_ 0
-	$tcp01 set bytes_ 0
-	$tcp10 set bytes_ 0
-	$tcp11 set bytes_ 0
 
 	set now [$ns now]
     $ns at [expr $now+$time] "record"
@@ -222,8 +214,8 @@ proc initialize {} {
 }
 
 proc record {} {
-	    global sink00 sink01 sink10 sink11 tcp00 tcp01 tcp10 tcp11
-		global th0 th1 f2 time ns delay transfer_ratio packet_size
+	    global sink00 sink01 sink10 sink11
+		global th0 th1 f2 time ns packet_size
 		#Set the time after which the procedure should be called again
 
 		#How many bytes have been received by the traffic sinks?
@@ -232,26 +224,15 @@ proc record {} {
 		set bw10 [$sink10 set bytes_]
 		set bw11 [$sink11 set bytes_]
 
-		set tcp_bw00 [$tcp00 set bytes_]
-		set tcp_bw01 [$tcp01 set bytes_]
-		set tcp_bw10 [$tcp10 set bytes_]
-		set tcp_bw11 [$tcp11 set bytes_]
-
 		#Get the current time
 		set now [$ns now]
 
 		#Calculate the bandwidth (in MBytes/s) and write it to the files
-		set throughput0 [expr ($bw00*8)/($time*1000000) + ($bw01*8)/($time*1000000)]
-		set throughput1 [expr ($bw10*8)/($time*1000000) + ($bw11*8)/($time*1000000)]
-
-		set end_to_end_delay [expr ($time * 2) / (($bw00 + $bw01 + $bw10 + $bw11)*8 / $packet_size)]
-    	set transfer_ratio_val [expr ($bw00 + $bw01 + $bw10 + $bw11)]
+		set throughput0 [expr ($bw00*8)/$time + ($bw01*8)/$time]
+		set throughput1 [expr ($bw10*8)/$time + ($bw11*8)/$time]
 
 		puts $th0 "$now [expr $throughput0]"
 		puts $th1 "$now [expr $throughput1]"
-		puts $delay "$now $end_to_end_delay"
-		puts $transfer_ratio "$now $transfer_ratio_val"
-
 
 		#Reset the bytes_ values on the traffic sinks
 		$sink00 set bytes_ 0
@@ -259,17 +240,12 @@ proc record {} {
 		$sink10 set bytes_ 0
 		$sink11 set bytes_ 0
 
-		$tcp00 set bytes_ 0
-        $tcp01 set bytes_ 0
-        $tcp10 set bytes_ 0
-        $tcp11 set bytes_ 0
-
 		#Re-schedule the procedure
 		$ns at [expr $now+$time] "record"
 	}
 
 proc finish {} {
-    global ns tracefd namfile th0 th1 name delay transfer_ratio
+    global ns tracefd namfile th0 th1 name
     $ns flush-trace
 
     close $namfile
@@ -277,8 +253,6 @@ proc finish {} {
 
     close $th0
     close $th1
-    close $delay
-    close $transfer_ratio
 
     exec nam $name.nam
     exit 0
