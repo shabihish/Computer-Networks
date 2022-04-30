@@ -20,13 +20,12 @@ set opt(ifq)            Queue/DropTail/PriQueue  ;# interface queue type
 set opt(ll)             LL                       ;# link layer type
 set opt(ant)            Antenna/OmniAntenna      ;# antenna model
 set opt(ifqlen)         50                       ;# max packet in ifq
-set opt(nn)             9
+set opt(nn)             9                        ;# num of nodes
 set opt(adhocRouting)   AODV                     ;# routing protocol
-set opt(x)              1050    ;# x coordinate of topology
-set opt(y)              1050                      ;# y coordinate of topology
-set opt(finish)              100.0                     ;# finish time
-set ns [new Simulator]
-
+set opt(x)              1050                     ;# x coordinate of topology
+set opt(y)              1050                     ;# y coordinate of topology
+set opt(finish)              100.0               ;# finish time
+set ns [new Simulator]                           ;# Simulator object
 
 set name wireless
 
@@ -42,9 +41,8 @@ $ns trace-all $tracefd
 $ns namtrace-all-wireless $namfile $opt(x) $opt(y)
 
 # Mac/802_11 set dataRate_                $val(datarate)
-Mac/802_11 set RTSThreshold_    100000
 Mac/802_11 set bandwidth_ $bandwidth
-
+Mac/802_11 set RTSThreshold_    1
 
 set topo [new Topography]
 $topo load_flatgrid $opt(x) $opt(y)

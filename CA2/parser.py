@@ -1,5 +1,6 @@
 import re
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def get_truncated_tr_lines(tr_lines: list):
@@ -47,6 +48,9 @@ class TrParser:
         arr_th0 = np.genfromtxt(self.th0_file_path, dtype=np.float64)
         arr_th1 = np.genfromtxt(self.th1_file_path, dtype=np.float64)
 
+        plt.plot(arr_th1[:, 1] + arr_th0[:, 1])
+        plt.ylim([0, 300000])
+        plt.show()
         return np.r_[arr_th0, arr_th1][:, 1].mean()
 
 
@@ -54,9 +58,9 @@ if __name__ == '__main__':
     parser = TrParser('wireless.tr', 'throughput0.tr', 'throughput1.tr')
 
     print('Now running...\nThis may take a few moments. Please be patient...')
-    packet_stats = parser.parse_tr_for_packet_statistics()
+    # packet_stats = parser.parse_tr_for_packet_statistics()
     avg_throughput = parser.get_avg_throughput()
 
     print('Avg throughput: {} bits/sec'.format(avg_throughput))
-    print('Avg end-to-end (one-way) delay: {} secs'.format(packet_stats['avg_oneway_delay']))
-    print('Avg transfer ratio: {}'.format(packet_stats['avg_transfer_ratio']))
+    # print('Avg end-to-end (one-way) delay: {} secs'.format(packet_stats['avg_oneway_delay']))
+    # print('Avg transfer ratio: {}'.format(packet_stats['avg_transfer_ratio']))
