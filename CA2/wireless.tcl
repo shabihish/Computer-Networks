@@ -2,13 +2,14 @@ if { $argc != 2 } {
         puts "Invalid usage!"
         puts "For example: ns $argv0 <TCP_Flavor> <case_no>"
         puts "Please try again."
+	abort()
     }
 set error_rate [lindex $argv 0]
 set bandwidth [lindex $argv 1]
 
 
 puts "error rate : $error_rate" 
-puts "band width : $bandwidth Mb" 
+puts "band width : $bandwidth Mb/Sec" 
 
 
 
