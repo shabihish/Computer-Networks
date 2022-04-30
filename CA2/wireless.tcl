@@ -161,43 +161,43 @@ $ns connect $tcp11 $sink11
 # #$ns lossmodel $err $tcp10 $E
 
 
-set ftp00 [new Application/Traffic/CBR]
-set ftp01 [new Application/Traffic/CBR]
-set ftp10 [new Application/Traffic/CBR]
-set ftp11 [new Application/Traffic/CBR]
+set cbr00 [new Application/Traffic/CBR]
+set cbr01 [new Application/Traffic/CBR]
+set cbr10 [new Application/Traffic/CBR]
+set cbr11 [new Application/Traffic/CBR]
 
-$ftp00 set rate_ 100kb
-$ftp01 set rate_ 100kb
-$ftp10 set rate_ 100kb
-$ftp11 set rate_ 100kb
+$cbr00 set rate_ 200Mb
+$cbr01 set rate_ 200Mb
+$cbr10 set rate_ 200Mb
+$cbr11 set rate_ 200Mb
 
-$ftp00 set packetSize_ 64Kb
-$ftp01 set packetSize_ 64Kb
-$ftp10 set packetSize_ 64Kb
-$ftp11 set packetSize_ 64Kb
+$cbr00 set packetSize_ 64Kb
+$cbr01 set packetSize_ 64Kb
+$cbr10 set packetSize_ 64Kb
+$cbr11 set packetSize_ 64Kb
 
-$ftp00 set random_ 1
-$ftp01 set random_ 1
-$ftp10 set random_ 1
-$ftp11 set random_ 1
+$cbr00 set random_ 1
+$cbr01 set random_ 1
+$cbr10 set random_ 1
+$cbr11 set random_ 1
 
 #$cbr1 set interval_ 500us
 #$cbr1 set packetSize_ 64
 #$cbr1 set rate_ 200Kb
 #$cbr1 set random_ 1
 
-$ftp00 attach-agent $tcp00
-$ftp01 attach-agent $tcp01
-$ftp10 attach-agent $tcp10
-$ftp11 attach-agent $tcp11
+$cbr00 attach-agent $tcp00
+$cbr01 attach-agent $tcp01
+$cbr10 attach-agent $tcp10
+$cbr11 attach-agent $tcp11
 
 
 $ns at 0.0 "initialize"
 
-$ns at 0.0 "$ftp00 start"
-$ns at 0.0 "$ftp11 start"
-$ns at 0.0 "$ftp10 start"
-$ns at 0.0 "$ftp01 start"
+$ns at 0.0 "$cbr00 start"
+$ns at 0.0 "$cbr11 start"
+$ns at 0.0 "$cbr10 start"
+$ns at 0.0 "$cbr01 start"
 
 
 $ns initial_node_pos $A 50
