@@ -1,3 +1,17 @@
+if { $argc != 2 } {
+        puts "Invalid usage!"
+        puts "For example: ns $argv0 <TCP_Flavor> <case_no>"
+        puts "Please try again."
+    }
+set error_rate [lindex $argv 0]
+set bandwidth [lindex $argv 1]
+
+
+puts "error rate : $error_rate" 
+puts "band width : $bandwidth Mb" 
+
+
+
 set opt(chan)           Channel/WirelessChannel  ;# channel type
 set opt(prop)           Propagation/TwoRayGround ;# radio-propagation model
 set opt(netif)          Phy/WirelessPhy          ;# network interface type
@@ -12,7 +26,7 @@ set opt(x)              1050    ;# x coordinate of topology
 set opt(y)              1050                      ;# y coordinate of topology
 set opt(finish)              100.0                     ;# finish time
 set ns [new Simulator]
-set packet_size 64
+
 
 set name wireless
 
@@ -29,6 +43,8 @@ $ns namtrace-all-wireless $namfile $opt(x) $opt(y)
 
 # Mac/802_11 set dataRate_                $val(datarate)
 Mac/802_11 set RTSThreshold_    100000
+Mac/802_11 set bandwidth_ $bandwidth
+
 
 set topo [new Topography]
 $topo load_flatgrid $opt(x) $opt(y)
@@ -40,7 +56,7 @@ set chan1 [new $opt(chan)]
 proc UniformErr {} {
     set err [new ErrorModel]
     $err unit packet ;#it can be bit too
-    $err set rate_ 0.0001
+    $err set rate_ &error_rate
     return $err
 }
 
