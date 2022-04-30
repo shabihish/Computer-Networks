@@ -1,6 +1,5 @@
 if { $argc != 2 } {
         puts "Invalid usage!"
-        puts "For example: ns $argv0 <TCP_Flavor> <case_no>"
         puts "Please try again."
 	abort()
     }
