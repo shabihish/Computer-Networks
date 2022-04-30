@@ -41,7 +41,8 @@ $ns trace-all $tracefd
 $ns namtrace-all-wireless $namfile $opt(x) $opt(y)
 
 # Mac/802_11 set dataRate_                $val(datarate)
-Mac/802_11 set bandwidth_ $bandwidth
+
+Mac/802_11 set dataRate_ $bandwidth.Mb
 Mac/802_11 set RTSThreshold_    1
 
 set topo [new Topography]
@@ -166,10 +167,10 @@ set cbr01 [new Application/Traffic/CBR]
 set cbr10 [new Application/Traffic/CBR]
 set cbr11 [new Application/Traffic/CBR]
 
-$cbr00 set rate_ 200Mb
-$cbr01 set rate_ 200Mb
-$cbr10 set rate_ 200Mb
-$cbr11 set rate_ 200Mb
+$cbr00 set rate_ 10Mb
+$cbr01 set rate_ 10Mb
+$cbr10 set rate_ 10Mb
+$cbr11 set rate_ 10Mb
 
 $cbr00 set packetSize_ 64Kb
 $cbr01 set packetSize_ 64Kb

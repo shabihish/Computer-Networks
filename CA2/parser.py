@@ -24,6 +24,7 @@ class TrParser:
 
     def parse_tr_for_packet_statistics(self):
         delays = list()
+        times = list()
         pck_cnt = 0
 
         for i, line_i in enumerate(self.truncated_tr_lines):
@@ -35,6 +36,7 @@ class TrParser:
                                          line_j)
                     if result_j:
                         delays.append(float(result_j.group(1)) - float(result_i.group(1)))
+                        times.append(float(result_i.group(1)))
                         # print(float(result_j.group(1)) - float(result_i.group(1)))
                         break
 
@@ -42,25 +44,43 @@ class TrParser:
             'avg_oneway_delay': sum(delays) / len(delays),
             'avg_transfer_ratio': len(delays) / pck_cnt
         }
-        return out_dict
+
+        delays_info = np.array([times,delays])
+        return out_dict , delays_info
 
     def get_avg_throughput(self):
         arr_th0 = np.genfromtxt(self.th0_file_path, dtype=np.float64)
         arr_th1 = np.genfromtxt(self.th1_file_path, dtype=np.float64)
+        return np.r_[arr_th0, arr_th1][:, 1].mean() , arr_th1[:, 1] + arr_th0[:, 1]
+       
 
-        plt.plot(arr_th1[:, 1] + arr_th0[:, 1])
-        plt.ylim([0, 300000])
-        plt.show()
-        return np.r_[arr_th0, arr_th1][:, 1].mean()
 
+
+
+def plot_throughput(throughputs):
+    plt.plot(throughputs)
+    plt.ylim([0, 300000])
+    plt.show()
+
+def plot_delay(delays_info):
+
+   
+    plt.plot(delays_info[0] , delays_info[1])
+    plt.ylim([0, 2])
+    
+    plt.show()
+       
 
 if __name__ == '__main__':
     parser = TrParser('wireless.tr', 'throughput0.tr', 'throughput1.tr')
 
     print('Now running...\nThis may take a few moments. Please be patient...')
-    # packet_stats = parser.parse_tr_for_packet_statistics()
-    avg_throughput = parser.get_avg_throughput()
+    packet_stats , delays_info = parser.parse_tr_for_packet_statistics()
+    avg_throughput ,throughputs = parser.get_avg_throughput()
+    plot_throughput(throughputs)
+
+    plot_delay(delays_info)
 
     print('Avg throughput: {} bits/sec'.format(avg_throughput))
-    # print('Avg end-to-end (one-way) delay: {} secs'.format(packet_stats['avg_oneway_delay']))
+    print('Avg end-to-end (one-way) delay: {} secs'.format(packet_stats['avg_oneway_delay']))
     # print('Avg transfer ratio: {}'.format(packet_stats['avg_transfer_ratio']))
