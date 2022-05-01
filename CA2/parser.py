@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 def get_truncated_tr_lines(tr_lines: list):
     out = list()
     for i, line in enumerate(tr_lines):
-        if re.search('^[sr].*-It tcp.*', line):
+        if re.search('^[dsr].*-It tcp.*', line):
             out.append(line)
     return out
 
@@ -21,36 +21,65 @@ class TrParser:
         self.truncated_tr_lines = get_truncated_tr_lines(self.tr_lines)
 
     def parse_tr_for_packet_statistics(self):
-        delays = list()
-        times = list()
-        pck_cnt = 0
+        delays = dict()
+        packets_dict = dict()
+        packets_sent = 0
 
         for i, line_i in enumerate(self.truncated_tr_lines):
-            result_i = re.search('^s -t ([0-9]*[.]?[0-9]*).*-Hs [03].*-Ii (\d+) .*', line_i)
-            if result_i:
-                pck_cnt += 1
-                for j, line_j in enumerate(self.truncated_tr_lines[i + 1:]):
-                    result_j = re.search('^r -t ([0-9]*[.]?[0-9]*).*-Hs [78].*-Ii {} .*'.format(result_i.group(2)),
-                                         line_j)
-                    if result_j:
-                        delays.append(float(result_j.group(1)) - float(result_i.group(1)))
-                        times.append(float(result_i.group(1)))
-                        # print(float(result_j.group(1)) - float(result_i.group(1)))
-                        break
+            result_srd = re.search('^([srd]) -t ([0-9]*[.]?[0-9]*) .*-Hs (\d+) .*-Ii (\d+) .*', line_i)
+            result_dict = {
+                'ptype': result_srd.group(1),
+                'time': result_srd.group(2),
+                'Hs': result_srd.group(3),
+                'uid': result_srd.group(4),
+            }
+
+            if not result_srd:
+                continue
+
+            if result_dict['ptype'] == 's':
+                # if the sender's not a tcp node, just ignore the case (tcp nodes: 0, 3)
+                if not re.search('[03]', result_dict['Hs']):
+                    continue
+
+                if result_dict['uid'] not in packets_dict:
+                    packets_dict[result_dict['uid']] = result_dict['time']
+                    packets_sent += 1
+
+            if result_dict['ptype'] == 'r':
+                # if the receiver's not a sink node, just ignore the case (sink nodes: 7, 8)
+                if not re.search('[78]', result_dict['Hs']):
+                    continue
+
+                # If packet's not yet sent, there's potentially been an error
+                if not result_dict['uid'] in packets_dict:
+                    continue
+
+                send_time = float(packets_dict[result_dict['uid']])
+                delays[result_dict['uid']] = (float(result_dict['time']) - send_time)
+
+            elif result_srd.group(1) == 'd':
+                # If packet's not yet sent, there's potentially been an error
+                if not result_dict['uid'] in packets_dict:
+                    continue
+
+                packets_dict.pop(result_dict['uid'])
+                if result_dict['uid'] in delays:
+                    delays.pop(result_dict['uid'])
 
         out_dict = {
-            'avg_oneway_delay': sum(delays) / len(delays),
-            'avg_transfer_ratio': len(delays) / pck_cnt
+            'avg_oneway_delay': sum(delays.values()) / len(delays),
+
+            # len(delays) is the number of packets received
+            'avg_transfer_ratio': len(delays) / packets_sent
         }
 
-        delays_info = np.array([times,delays])
-        return out_dict , delays_info
+        return out_dict
 
     def get_avg_throughput(self):
         arr_th0 = np.genfromtxt(self.th0_file_path, dtype=np.float64)
         arr_th1 = np.genfromtxt(self.th1_file_path, dtype=np.float64)
-        return np.r_[arr_th0, arr_th1][:, 1].mean() , arr_th1[:, 1] + arr_th0[:, 1]
-
+        return (arr_th0[:, 1] + arr_th1[:, 1]).mean()
 
 def plot_throughput(throughputs):
     plt.plot(throughputs)
@@ -70,12 +99,9 @@ if __name__ == '__main__':
     parser = TrParser('wireless.tr', 'throughput0.tr', 'throughput1.tr')
 
     print('Now running...\nThis may take a few moments. Please be patient...')
-    packet_stats , delays_info = parser.parse_tr_for_packet_statistics()
-    avg_throughput ,throughputs = parser.get_avg_throughput()
-    plot_throughput(throughputs)
-
-    plot_delay(delays_info)
+    packet_stats = parser.parse_tr_for_packet_statistics()
+    avg_throughput = parser.get_avg_throughput()
 
     print('Avg throughput: {} bits/sec'.format(avg_throughput))
     print('Avg end-to-end (one-way) delay: {} secs'.format(packet_stats['avg_oneway_delay']))
-    # print('Avg transfer ratio: {}'.format(packet_stats['avg_transfer_ratio']))
+    print('Avg transfer ratio: {}'.format(packet_stats['avg_transfer_ratio']))

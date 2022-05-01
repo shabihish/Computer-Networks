@@ -4,7 +4,7 @@ if { $argc != 2 } {
 	abort()
     }
 set error_rate [lindex $argv 0]
-set bandwidth [lindex $argv 1]
+set bandwidth [lindex $argv 1].Mb
 
 
 puts "error rate : $error_rate" 
@@ -160,16 +160,22 @@ set cbr10 [new Application/Traffic/CBR]
 set cbr11 [new Application/Traffic/CBR]
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 $cbr00 set rate_ 10Mb
 $cbr01 set rate_ 10Mb
 $cbr10 set rate_ 10Mb
 $cbr11 set rate_ 10Mb
 =======
+=======
+>>>>>>> tmp
 #$cbr00 set rate_ 20Mb
 #$cbr01 set rate_ 20Mb
 #$cbr10 set rate_ 20Mb
 #$cbr11 set rate_ 20Mb
+<<<<<<< HEAD
 >>>>>>> a0e7afe (Make final tcl changes)
+=======
+>>>>>>> tmp
 
 $cbr00 set packetSize_ 64Kb
 $cbr01 set packetSize_ 64Kb
