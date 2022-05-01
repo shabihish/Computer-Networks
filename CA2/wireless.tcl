@@ -4,7 +4,7 @@ if { $argc != 2 } {
 	abort()
     }
 set error_rate [lindex $argv 0]
-set bandwidth [lindex $argv 1]
+set bandwidth [lindex $argv 1].Mb
 
 
 puts "error rate : $error_rate" 
