@@ -2,14 +2,12 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 def get_truncated_tr_lines(tr_lines: list):
     out = list()
     for i, line in enumerate(tr_lines):
         if re.search('^[sr].*-It tcp.*', line):
             out.append(line)
     return out
-
 
 class TrParser:
     def __init__(self, tr_file_path: str, th0_file_path: str, th1_file_path: str):
@@ -52,9 +50,6 @@ class TrParser:
         arr_th0 = np.genfromtxt(self.th0_file_path, dtype=np.float64)
         arr_th1 = np.genfromtxt(self.th1_file_path, dtype=np.float64)
         return np.r_[arr_th0, arr_th1][:, 1].mean() , arr_th1[:, 1] + arr_th0[:, 1]
-       
-
-
 
 
 def plot_throughput(throughputs):

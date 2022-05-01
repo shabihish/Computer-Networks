@@ -53,9 +53,11 @@ create-god $opt(nn)
 set chan1 [new $opt(chan)]
 
 proc UniformErr {} {
+    global  error_rate
     set err [new ErrorModel]
     $err unit packet ;#it can be bit too
-    $err set rate_ &error_rate
+    $err set rate_ $error_rate
+    puts "$error_rate"
     return $err
 }
 
@@ -74,8 +76,6 @@ $ns node-config -adhocRouting $opt(adhocRouting) \
                  -routerTrace ON \
                  -macTrace ON \
                  -IncomingErrProc UniformErr
-                 #-txpower 0.002 \
-                 #-rxpower 0.002
 
 
 # Create the nodes
@@ -154,44 +154,37 @@ $ns connect $tcp01 $sink10
 $ns connect $tcp10 $sink01
 $ns connect $tcp11 $sink11
 
-#not working
-# set err [new ErrorModel]
-
-# $err set rate_ 0.001
-# $ns_ lossmodel $err $A $C
-# #$ns lossmodel $err $tcp10 $E
-
-
 set cbr00 [new Application/Traffic/CBR]
 set cbr01 [new Application/Traffic/CBR]
 set cbr10 [new Application/Traffic/CBR]
 set cbr11 [new Application/Traffic/CBR]
 
+<<<<<<< HEAD
 $cbr00 set rate_ 10Mb
 $cbr01 set rate_ 10Mb
 $cbr10 set rate_ 10Mb
 $cbr11 set rate_ 10Mb
+=======
+#$cbr00 set rate_ 20Mb
+#$cbr01 set rate_ 20Mb
+#$cbr10 set rate_ 20Mb
+#$cbr11 set rate_ 20Mb
+>>>>>>> a0e7afe (Make final tcl changes)
 
 $cbr00 set packetSize_ 64Kb
 $cbr01 set packetSize_ 64Kb
 $cbr10 set packetSize_ 64Kb
 $cbr11 set packetSize_ 64Kb
 
-$cbr00 set random_ 1
-$cbr01 set random_ 1
-$cbr10 set random_ 1
-$cbr11 set random_ 1
-
-#$cbr1 set interval_ 500us
-#$cbr1 set packetSize_ 64
-#$cbr1 set rate_ 200Kb
-#$cbr1 set random_ 1
-
 $cbr00 attach-agent $tcp00
 $cbr01 attach-agent $tcp01
 $cbr10 attach-agent $tcp10
 $cbr11 attach-agent $tcp11
 
+#$cbr00 set random_ 1
+#$cbr01 set random_ 1
+#$cbr10 set random_ 1
+#$cbr11 set random_ 1
 
 $ns at 0.0 "initialize"
 
@@ -199,7 +192,6 @@ $ns at 0.0 "$cbr00 start"
 $ns at 0.0 "$cbr11 start"
 $ns at 0.0 "$cbr10 start"
 $ns at 0.0 "$cbr01 start"
-
 
 $ns initial_node_pos $A 50
 $ns initial_node_pos $B 50

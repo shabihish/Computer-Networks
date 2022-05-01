@@ -5,6 +5,8 @@ README.md
 *.pdf
 *.nam
 *.tr
+venv*
+*.bac
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
