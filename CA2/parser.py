@@ -80,16 +80,3 @@ class TrParser:
         arr_th0 = np.genfromtxt(self.th0_file_path, dtype=np.float64)
         arr_th1 = np.genfromtxt(self.th1_file_path, dtype=np.float64)
         return (arr_th0[:, 1] + arr_th1[:, 1]).mean()
-
-def plot_throughput(throughputs):
-    plt.plot(throughputs)
-    plt.ylim([0, 300000])
-    plt.show()
-
-def plot_delay(delays_info):
-
-   
-    plt.plot(delays_info[0] , delays_info[1])
-    plt.ylim([0, 2])
-    
-    plt.show()

@@ -1,10 +1,11 @@
-if { $argc != 2 } {
+if { $argc != 3 } {
         puts "Invalid usage!"
         puts "Please try again."
 	abort()
     }
 set error_rate [lindex $argv 0]
 set bandwidth [lindex $argv 1].Mb
+set packet_size [lindex $argv 2].Kb
 
 
 puts "error rate : $error_rate" 
@@ -156,25 +157,16 @@ set cbr01 [new Application/Traffic/CBR]
 set cbr10 [new Application/Traffic/CBR]
 set cbr11 [new Application/Traffic/CBR]
 
-#$cbr00 set rate_ 20Mb
-#$cbr01 set rate_ 20Mb
-#$cbr10 set rate_ 20Mb
-#$cbr11 set rate_ 20Mb
 
-$cbr00 set packetSize_ 64Kb
-$cbr01 set packetSize_ 64Kb
-$cbr10 set packetSize_ 64Kb
-$cbr11 set packetSize_ 64Kb
+$tcp00 set packetSize_ $packet_size.Kb
+$tcp01 set packetSize_ $packet_size.Kb
+$tcp10 set packetSize_ $packet_size.Kb
+$tcp11 set packetSize_ $packet_size.Kb
 
 $cbr00 attach-agent $tcp00
 $cbr01 attach-agent $tcp01
 $cbr10 attach-agent $tcp10
 $cbr11 attach-agent $tcp11
-
-#$cbr00 set random_ 1
-#$cbr01 set random_ 1
-#$cbr10 set random_ 1
-#$cbr11 set random_ 1
 
 $ns at 0.0 "initialize"
 
@@ -222,7 +214,7 @@ proc record {} {
 		#Get the current time
 		set now [$ns now]
 
-		#Calculate the bandwidth (in MBytes/s) and write it to the files
+		# Calculate the throughput (in b/s) and write it to the files
 		set throughput0 [expr ($bw00*8)/$time + ($bw01*8)/$time]
 		set throughput1 [expr ($bw10*8)/$time + ($bw11*8)/$time]
 
