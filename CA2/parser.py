@@ -93,15 +93,3 @@ def plot_delay(delays_info):
     plt.ylim([0, 2])
     
     plt.show()
-       
-
-if __name__ == '__main__':
-    parser = TrParser('wireless.tr', 'throughput0.tr', 'throughput1.tr')
-
-    print('Now running...\nThis may take a few moments. Please be patient...')
-    packet_stats = parser.parse_tr_for_packet_statistics()
-    avg_throughput = parser.get_avg_throughput()
-
-    print('Avg throughput: {} bits/sec'.format(avg_throughput))
-    print('Avg end-to-end (one-way) delay: {} secs'.format(packet_stats['avg_oneway_delay']))
-    print('Avg transfer ratio: {}'.format(packet_stats['avg_transfer_ratio']))

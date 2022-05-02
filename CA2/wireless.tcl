@@ -8,9 +8,7 @@ set bandwidth [lindex $argv 1].Mb
 
 
 puts "error rate : $error_rate" 
-puts "band width : $bandwidth Mb/Sec" 
-
-
+puts "band width : $bandwidth Mb/Sec"
 
 set opt(chan)           Channel/WirelessChannel  ;# channel type
 set opt(prop)           Propagation/TwoRayGround ;# radio-propagation model
@@ -57,7 +55,6 @@ proc UniformErr {} {
     set err [new ErrorModel]
     $err unit packet ;#it can be bit too
     $err set rate_ $error_rate
-    puts "$error_rate"
     return $err
 }
 
@@ -251,7 +248,7 @@ proc finish {} {
 
     close $th0
     close $th1
-    exec nam $name.nam
+    # exec nam $name.nam
     exit 0
 }
 
