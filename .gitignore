@@ -7,6 +7,9 @@ README.md
 *.tr
 venv*
 *.bac
+*.txt
+cmake-build-debug
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
