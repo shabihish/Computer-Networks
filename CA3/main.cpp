@@ -43,8 +43,7 @@ class Route
 
 };
 
-int create_routing_table(string line, vector<Route*> *RoutingTable)
-{
+int create_routing_table(string line, vector<Route*> *RoutingTable){
     int maxNodeNum = 0;
     const char delim = ' ';
     
@@ -84,7 +83,7 @@ void print_topology(vector<Route*> RoutingTable , int countOfNodes)
     cout<<"u|v |";
     for(int i = 1 ; i<= countOfNodes ; i++)
          cout<<setw(2)<<i;
-    cout <<endl<< right << setfill('.') << setw(10)<<"."<<endl;
+    cout <<endl<< right << setfill('.') << setw(countOfNodes * 3)<<"."<<endl;
     for(int i=0 ;i< countOfNodes ; i++)
      {
         cout<<i+1<<"  | ";
@@ -95,9 +94,6 @@ void print_topology(vector<Route*> RoutingTable , int countOfNodes)
         cout<<endl;
      }
 }
-
-
-// 
 
 int main()
 {
