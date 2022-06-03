@@ -30,11 +30,11 @@ void Network::printTopology() {
 
     vector<vector<int>> net(numberOfNodes, vector<int>(numberOfNodes, -1));
 
-    for (size_t i = 0; i < routes.size(); i++) {
-        int node1 = routes[i]->get_node1();
-        int node2 = routes[i]->get_node2();
-        net[node1][node2] = routes[i]->get_distance();
-        net[node2][node1] = routes[i]->get_distance();
+    for (auto & route : routes) {
+        int node1 = route->get_node1();
+        int node2 = route->get_node2();
+        net[node1][node2] = route->get_distance();
+        net[node2][node1] = route->get_distance();
      
     }
 
