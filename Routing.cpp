@@ -60,14 +60,14 @@ vector<int> get_path(vector<int> parents, int src, int node) {
 void print_routingTable(vector<int> routingTable, vector<int> prevHops, int src) {
 
     cout << "\nRouting table at node " << src + 1 << endl;
-    cout << "Dest\t\tNext Hop\tDist\t\tShortest Path\n";
+    cout << "Dest\t\tNext Hop\tDist     \tShortest Path\n";
     for (size_t i = 0; i < routingTable.size(); ++i) {
         vector<int> path = get_path(prevHops, src, i);
 
         int nextHop = (path.size() < 2) ? path[0] : path[path.size() - 2];
         int dist = (routingTable[i] == INT_MAX) ? -1 : routingTable[i];
         nextHop = (routingTable[i] == INT_MAX) ? -1 : nextHop;
-        cout << i + 1 << "\t\t\t" << nextHop << "\t\t\t" << dist << "\t\t\t";
+        cout << i + 1 << "\t\t" << nextHop << "\t\t" << dist << "\t\t";
 
         int pathLength = (routingTable[i] == INT_MAX) ? -1 : path.size() - 1;
         cout << "[ ";
