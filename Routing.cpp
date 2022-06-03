@@ -78,7 +78,7 @@ void print_routingTable(vector<int> routingTable, vector<int> prevHops, int src)
         int nextHop = (path.size() < 2) ? path[0] : path[path.size() - 2];
         int dist = (routingTable[i] == INT_MAX) ? -1 : routingTable[i];
         nextHop = (routingTable[i] == INT_MAX) ? -1 : nextHop;
-        cout << i + 1 << "\t\t" << nextHop << "\t\t" << dist << "\t\t";
+        cout << i + 1 << "\t\t\t" << nextHop << "\t\t\t" << dist << "\t\t\t";
 
         int pathLength = (routingTable[i] == INT_MAX) ? -1 : path.size() - 1;
         cout << "[ ";
@@ -118,38 +118,66 @@ int minDistance(vector<int> dist, bool sptSet[]) {
     return min_index;
 }
 
-void printPath(int parent[], int j) {
-    // Base Case : If j is source
+void printPath(vector<int> parent, int j) {
     if (parent[j] == -1)
         return;
     printPath(parent, parent[j]);
-    cout << j << " ";
+    cout << " --> " << j + 1;
 }
 
-int printSolution(vector<int> dist, int n, int parent[]) {
-    int src = 0;
-    cout << "Vertex\t Distance\tPath";
-    for (int i = 1; i < dist.size(); i++) {
-        printf("\n%d -> %d \t\t %d\t\t%d ", src, i, dist[i],
-               src);
+int printSolution(vector<int> dist, vector<int> parent, int src) {
+    cout << "Path:" << endl;
+    cout << "[s] --> [d]\t\tMin-Cost\t\tShortest Path";
+    for (int i = 0; i < dist.size(); i++) {
+        if (i == src)
+            continue;
+        printf("\n[%d] --> [%d] \t\t %d\t\t\t%d", src + 1, i + 1, dist[i],
+               src + 1);
         printPath(parent, i);
     }
+    cout << endl << endl << endl;
 }
 
+int printIteration(vector<int> dist, int iterNum) {
+    cout << "Iter " << iterNum << ":" << endl;
 
-vector<int> Routing::LSPR(vector<int> routingTable, int src) {
-    int n = routingTable.size();
+    cout << "Dest\t\t";
+    for (int i = 0; i < dist.size(); i++) {
+        if (i == 0)
+            cout << "|";
+        cout << "\t" << i + 1 << "\t|";
+    }
+    cout << endl << endl;
 
-    bool sptSet[n] = {false};
-    int parent[n] = {-1};
 
-    for (int i = 0; i < n; i++)
+    cout << "Cost\t\t";
+    for (int i = 0; i < dist.size(); i++) {
+        if (i == 0)
+            cout << "|";
+        int out = dist[i] < INT_MAX ? dist[i] : -1;
+        cout << "\t" << out << "\t|";
+    }
+    cout << endl;
+    cout << "------------------------------------------" << endl;
+}
+
+vector<int> Routing::LSPR(vector<int> &routingTable, int src) {
+    size_t n = routingTable.size();
+
+    bool sptSet[n];
+    vector<int> parent(n);
+
+    for (size_t i = 0; i < n; i++) {
+        sptSet[i] = false;
+        parent[i] = -1;
         if (i != src)
             routingTable[i] = INT_MAX;
         else
             routingTable[i] = 0;
+    }
     vector<vector<int>> networkGraph(n);
-    for (int i = 0; i < n; i++) {
+
+    for (size_t i = 0; i < n; i++) {
         networkGraph.emplace_back(vector<int>(n));
         for (int j = 0; j < n; j++) {
             networkGraph[i].emplace_back(0);
@@ -174,15 +202,16 @@ vector<int> Routing::LSPR(vector<int> routingTable, int src) {
 
         sptSet[u] = true;
 
-        for (int v = 0; v < V; v++)
+
+        for (int v = 0; v < n; v++)
             if (!sptSet[v] && networkGraph[u][v]
                 && routingTable[u] + networkGraph[u][v] < routingTable[v]) {
                 parent[v] = u;
                 routingTable[v] = routingTable[u] + networkGraph[u][v];
             }
+        printIteration(routingTable, count + 1);
     }
-    printSolution(routingTable, n, parent);
-//    return nullptr;
+    return parent;
 }
 
 void Routing::runLSPR(int src, bool allNodes) {
@@ -193,8 +222,8 @@ void Routing::runLSPR(int src, bool allNodes) {
         return;
     } else {
         vector<int> routingTable(numOfNodes);
-        vector<int> prevHops = DVRP(&routingTable, src);
-//        print_routingTable(routingTable, prevHops, src);
+        vector<int> parent = LSPR(routingTable, src);
+        printSolution(routingTable, parent, src);
     }
 }
 

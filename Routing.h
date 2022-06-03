@@ -24,7 +24,7 @@ class Routing{
     private:
         Network *network;
         vector<int> DVRP(vector<int> *routingTable, int src);
-        vector<int> LSPR(vector<int> routingTable, int src);
+        vector<int> LSPR(vector<int>& routingTable, int src);
 
 };
 

@@ -11,7 +11,6 @@ LDFLAGS ?= -g
 
 $(TARGET_EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
-	./$(TARGET_EXEC)
 
 $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(MKDIR_BUILD) $(dir $@)
@@ -21,6 +20,9 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 
 clean:
 	$(RM) -r $(BUILD_DIR)
+
+run:
+	./$(TARGET_EXEC)
 
 -include $(DEPS)
 
