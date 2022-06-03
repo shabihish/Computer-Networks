@@ -1,25 +1,27 @@
-# Makefile for Writing Make Files Example
- 
-# *****************************************************
-# Variables to control Makefile operation
- 
-CC = g++
-CFLAGS = -Wall -g
- 
-default: main
-# ****************************************************
-# Targets needed to bring the executable up to date
+TARGET_EXEC ?= main
 
-main: main.o Network.o Routing.o
-	$(CC) $(CFLAGS) -o main main.o Network.o Routing.o
+BUILD_DIR ?= ./build
+CC=g++ -g -std=c++11
 
- 
-main.o: main.cpp Network.h Routing.h
-	$(CC) $(CFLAGS) -c main.cpp
- 
-Network.o: Network.h
- 
-Routing.o: Routing.h Network.h
+SRCS := $(shell find -name '*.cpp' )
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
-clean: 
-	$(RM) main *.o *~
+CPPFLAGS ?= -std=c++11
+LDFLAGS ?= -g
+
+$(TARGET_EXEC): $(OBJS)
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
+	./$(TARGET_EXEC)
+
+$(BUILD_DIR)/%.cpp.o: %.cpp
+	$(MKDIR_BUILD) $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@ $(LDFLAGS)
+
+.PHONY: clean
+
+clean:
+	$(RM) -r $(BUILD_DIR)
+
+-include $(DEPS)
+
+MKDIR_BUILD ?= mkdir -p

@@ -23,8 +23,8 @@
 using namespace std;
 ////
 // topology 13-9-7 13-6-4 9-12-5 6-4-19 6-11-25 6-8-17 6-2-2 4-10-11 10-5-3 10-12-12 5-1-6 11-8-16 8-3-4 12-3-8 12-7-8 2-7-13 3-7-1 1-7-7
-std::vector<std::string> string_split(const std::string& strr) {
-	std::vector<std::string> result;
+vector<string> string_split(const string& strr) {
+	vector<string> result;
    
    
 
@@ -64,6 +64,13 @@ int main()
         if (command == SHOW)
             network.printTopology();
 
+        if(command == LSPR)
+        {
+            if(inputData.size() == 0)
+                routing.runLSPR( -1, true);
+            else
+                routing.runLSPR(stoi(inputData[0])-1,false);
+        }
         if(command == DVRP)
         {
             if(inputData.size() == 0)

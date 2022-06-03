@@ -19,13 +19,12 @@ class Routing{
     public:
         Routing(Network *net);
         void runDVRP(int src, bool allNodes = true);
-        void runLSPR();
-        
-    
-        
+        void runLSPR(int src, bool allNodes = true);
+
     private:
         Network *network;
-        std::vector<int> DVRP(std::vector<int> *routingTable, int src);
+        vector<int> DVRP(vector<int> *routingTable, int src);
+        vector<int> LSPR(vector<int> routingTable, int src);
 
 };
 
