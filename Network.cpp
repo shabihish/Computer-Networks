@@ -73,15 +73,13 @@ void Network::modifyRoute(int node1, int node2, int  newDistance)
         cout<<"Error: Source node and destination node must be different"<<endl;
         return;
     }
-    for (size_t i = 1; i <= routes.size() - 1; i++) {
-        for (size_t j = 0; j < routes.size(); j++) {
-            if(routes[j]->get_node1() == node1 && routes[j]->get_node2()== node2)
-            {
-               routes[j]->set_distance(newDistance);
-               return;
-            }
-           
-        }
+    for (size_t j = 0; j < routes.size(); j++) {
+        if((routes[j]->get_node1() == node1 && routes[j]->get_node2()== node2)
+            || (routes[j]->get_node1() == node2 && routes[j]->get_node2()== node1))
+        {
+            routes[j]->set_distance(newDistance);
+            return;
+        }       
     }
     numberOfNodes = max({numberOfNodes, node1, node2});
     routes.push_back(new Route(node1 ,node2 , newDistance));
@@ -91,10 +89,10 @@ void Network::removeRoute(int node1, int node2)
 {
    
         for (size_t j = 0; j < routes.size(); j++) {
-            if(routes[j]->get_node1() == node1 && routes[j]->get_node2()== node2)
+            if((routes[j]->get_node1() == node1 && routes[j]->get_node2()== node2)||
+                (routes[j]->get_node1() == node2 && routes[j]->get_node2()== node1))
             {
                routes.erase(routes.begin()+j);
-             
                return;
             }  
         }
