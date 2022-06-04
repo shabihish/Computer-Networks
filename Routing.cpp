@@ -213,4 +213,3 @@ void Routing::runLSRP(int src, bool allNodes) {
         printMinDists(routingTable, parent, src);
     }
 }
-
